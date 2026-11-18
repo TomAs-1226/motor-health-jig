@@ -111,6 +111,29 @@ class RecordsTest {
   }
 
   @Test
+  void clockFromAnUnsetRioIsNotTrusted() {
+    // What X1's rio reported over SSH before any Driver Station connected.
+    assertFalse(JigSession.clockTrusted(java.time.Instant.parse("2024-12-18T14:07:14Z")));
+    assertTrue(JigSession.clockTrusted(java.time.Instant.parse("2026-11-18T03:31:54Z")));
+    assertEquals(
+        java.time.Instant.parse("2026-11-01T00:00:00Z").getEpochSecond(),
+        JigSession.CLOCK_SANE_AFTER_EPOCH_S);
+  }
+
+  @Test
+  void parsesTheRealX1DeviceList() throws Exception {
+    // Shape and values as X1's rio served them on 2026-11-18 (names trimmed to two devices).
+    String json =
+        "{\"DeviceArray\":[{\"Model\":\"Talon FX vers. C\",\"ID\":11,\"Name\":\"Front Left Steer\","
+            + "\"SerialNo\":\"000E173405DC0000001900010B00011A\",\"CANbus\":\"rio\","
+            + "\"CurrentVers\":\"26.1.1.1 (Phoenix 6)\",\"ManDate\":\"July 1, 2024\"}]}";
+    DeviceDiscovery.DeviceInfo d = DeviceDiscovery.parse(json).get(0);
+    assertTrue(d.isTalonFx(), "\"Talon FX vers. C\" is a Talon FX");
+    assertEquals(11, d.id());
+    assertEquals("SN-000E173405DC0000001900010B00011A", RecordStore.fileSafe("SN-" + d.serial()));
+  }
+
+  @Test
   void fileNamesAreSafe() {
     assertEquals("SN-ab_cd_1", RecordStore.fileSafe("SN-ab/cd:1"));
   }

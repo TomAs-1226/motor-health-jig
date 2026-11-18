@@ -41,6 +41,15 @@ The script copies `/home/lvuser/motor-health/tests/*.json` from the rio into `re
 
 Commit `records/` and push it when you're done.
 
+### Connecting to the rio
+
+X1's rio is a roboRIO 2 on image `FRC_roboRIO2_2026_v1.2`, team 5805, Java 17. Its CAN devices are on 2026 firmware (26.1.1.1).
+
+- **USB-B** is the simplest. The rio is always `172.22.11.2` over USB.
+- **Ethernet straight to the laptop** works too. With no DHCP on the cable, both ends give themselves a `169.254.x.x` address, and `roboRIO-5805-FRC.local` finds the rio by mDNS.
+- **Tailscale blocks the Ethernet route.** Tailscale claims the whole `169.254.0.0/16` route, so traffic meant for the rio goes into the tunnel. Deploy, the Driver Station and `pull_records.py` then fail even though mDNS resolves the name. **Disconnect Tailscale while you're on the jig.** Alternatively, run `pull_records.py --host <rio 169.254 address> --bind <laptop's Ethernet 169.254 address>`.
+- **The rio's clock starts wrong.** It has no clock battery: X1's booted thinking it was December 2024. The Driver Station sets the real time when it connects. A record made before then is saved with `clockTrusted: false`.
+
 ## The test
 
 | Phase | What happens | What it shows |

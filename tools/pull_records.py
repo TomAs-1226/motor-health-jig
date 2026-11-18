@@ -44,12 +44,14 @@ def default_hosts() -> list[str]:
     return [f"10.{te}.{am}.2", "172.22.11.2", f"roboRIO-{TEAM}-FRC.local"]
 
 
-def pull(hosts: list[str], legacy: bool) -> Path | None:
+def pull(hosts: list[str], legacy: bool, bind: str | None) -> Path | None:
     """scp the remote tests/ into a temp dir. Returns it, or None if no host answered."""
     tmp = Path(tempfile.mkdtemp(prefix="motor-health-"))
     for host in hosts:
         print(f"Trying lvuser@{host} ... (the password is empty: just press Enter if asked)")
         cmd = ["scp", "-o", "ConnectTimeout=5", "-o", "StrictHostKeyChecking=accept-new"]
+        if bind:
+            cmd += ["-o", f"BindAddress={bind}"]
         if legacy:
             cmd.append("-O")
         cmd += [f"lvuser@{host}:{REMOTE_DIR}/*.json", str(tmp)]
@@ -185,13 +187,16 @@ def main() -> int:
     p.add_argument("--from-dir", type=Path, help="import JSON records from this folder instead of scp")
     p.add_argument("--no-pull", action="store_true", help="only rebuild the summaries")
     p.add_argument("--legacy-scp", action="store_true", help="pass -O to scp, for old SSH servers")
+    p.add_argument("--bind", metavar="LAPTOP_IP",
+                   help="send from this laptop address, e.g. the Ethernet adapter's 169.254.x.x when"
+                        " Tailscale has taken the 169.254.0.0/16 route")
     a = p.parse_args()
 
     RECORDS.mkdir(exist_ok=True)
     if a.from_dir:
         print(f"Imported {import_from(a.from_dir)} new record(s) from {a.from_dir}.")
     elif not a.no_pull:
-        tmp = pull(a.host or default_hosts(), a.legacy_scp)
+        tmp = pull(a.host or default_hosts(), a.legacy_scp, a.bind)
         if tmp is None:
             print("Could not reach the roboRIO. Is the laptop on its radio or USB? "
                   "Records there are safe; nothing was changed here.", file=sys.stderr)

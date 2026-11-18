@@ -67,7 +67,24 @@ final class JigSession {
     state = State.WAITING_FOR_DEVICES;
     stateStart = now;
     status("Looking for motors...");
+    if (!clockTrusted(Instant.now())) {
+      System.err.println(
+          "[MotorHealth] The roboRIO clock reads " + Instant.now() + ": records will carry that"
+              + " date with clockTrusted=false. The Driver Station sets the clock when it connects.");
+    }
   }
+
+  /**
+   * True once the clock is past the day this jig was written. The roboRIO has no clock battery: it
+   * boots at whatever date it last saved (X1's rio booted in December 2024) until the Driver
+   * Station sets it, so "after 2023" is not a test of anything.
+   */
+  static boolean clockTrusted(Instant t) {
+    return t.getEpochSecond() > CLOCK_SANE_AFTER_EPOCH_S;
+  }
+
+  /** 2026-11-01T00:00Z. */
+  static final long CLOCK_SANE_AFTER_EPOCH_S = 1_793_491_200L;
 
   void update(double now) {
     switch (state) {
@@ -215,8 +232,7 @@ final class JigSession {
     record.put("version", 1);
     record.put("testedAt", at.toString());
     record.put("testedAtMs", at.toEpochMilli());
-    // The roboRIO has no battery clock; the Driver Station sets the time when it connects.
-    record.put("clockTrusted", at.getEpochSecond() > 1_700_000_000L);
+    record.put("clockTrusted", clockTrusted(at));
     record.put("label", label);
     record.put("notes", notes);
     record.put("motor", motorJson(run, spec));
