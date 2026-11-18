@@ -1,0 +1,31 @@
+# Gradle
+.gradle/
+build/
+bin/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/settings.json
+.project
+.classpath
+.settings/
+
+# Simulation / logging artifacts
+logs/
+ctre_sim/
+*.wpilog
+*.hoot
+simgui*.json
+networktables.json
+networktables.json.bck
+motor-health-sim/
+
+# Python
+__pycache__/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
