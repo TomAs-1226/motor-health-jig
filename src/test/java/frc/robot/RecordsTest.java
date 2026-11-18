@@ -126,11 +126,42 @@ class RecordsTest {
     String json =
         "{\"DeviceArray\":[{\"Model\":\"Talon FX vers. C\",\"ID\":11,\"Name\":\"Front Left Steer\","
             + "\"SerialNo\":\"000E173405DC0000001900010B00011A\",\"CANbus\":\"rio\","
-            + "\"CurrentVers\":\"26.1.1.1 (Phoenix 6)\",\"ManDate\":\"July 1, 2024\"}]}";
+            + "\"CurrentVers\":\"26.1.1.1 (Phoenix 6)\",\"ManDate\":\"July 1, 2024\","
+            + "\"HardwareRev\":\"3.4\",\"BootloaderRev\":\"1.0\",\"IsPROLicensed\":false,"
+            + "\"Licenses\":[\"LIC-24-80827900-FRC-05805\"]}]}";
     DeviceDiscovery.DeviceInfo d = DeviceDiscovery.parse(json).get(0);
     assertTrue(d.isTalonFx(), "\"Talon FX vers. C\" is a Talon FX");
     assertEquals(11, d.id());
+    assertEquals("3.4", d.hardwareRev());
+    assertEquals("1.0", d.bootloaderRev());
+    assertFalse(d.proLicensed());
+    assertEquals("LIC-24-80827900-FRC-05805", d.licenses());
     assertEquals("SN-000E173405DC0000001900010B00011A", RecordStore.fileSafe("SN-" + d.serial()));
+  }
+
+  @Test
+  void motorNumbersComeFromSeedAndRecordsAndNewOnesCountUp(@TempDir Path dir) throws Exception {
+    Path seed = dir.resolve("motor-numbers.json");
+    Files.writeString(
+        seed,
+        "{\"motors\":[{\"number\":1,\"serial\":\"S1\"},{\"number\":2,\"serial\":\"S2\"}]}");
+    Map<String, Object> tested = record("S3", "KrakenX60_Integrated", 1, "GOOD", 8, 2, 4);
+    tested.put("motorNumber", 3);
+    Map<String, Integer> known = MotorNumbers.known(seed, List.of(tested));
+
+    assertEquals(1, MotorNumbers.numberFor("S1", known));
+    assertEquals(3, MotorNumbers.numberFor("S3", known), "a tested motor keeps its number");
+    assertEquals(4, MotorNumbers.numberFor("NEW", known), "a new serial gets the next number");
+    assertNull(MotorNumbers.numberFor("", known), "no serial, no number");
+    assertEquals(1, MotorNumbers.numberFor("X", MotorNumbers.known(dir.resolve("none"), List.of())));
+  }
+
+  @Test
+  void deployedSeedNumbersTheFirstTwoMotors() {
+    Map<String, Integer> seed =
+        MotorNumbers.readSeed(Path.of("src/main/deploy").resolve(MotorNumbers.SEED_FILE));
+    assertEquals(1, seed.get("000E173405DC0000001900010B00011A"));
+    assertEquals(2, seed.get("000E1670085CA00000160000D60000F9"));
   }
 
   @Test

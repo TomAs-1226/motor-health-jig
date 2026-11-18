@@ -2,6 +2,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.TalonFX;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -132,7 +133,7 @@ final class JigSession {
       otherDevices = others;
       serialsKnown = false;
       for (int id : JigConfig.FALLBACK_IDS) {
-        motor(new DeviceDiscovery.DeviceInfo("Talon FX", id, "", "", "rio", "", "", ""));
+        motor(DeviceDiscovery.DeviceInfo.probed(id));
       }
       state = State.PROBING;
       stateStart = now;
@@ -146,8 +147,7 @@ final class JigSession {
     }
     List<DeviceDiscovery.DeviceInfo> found = new ArrayList<>();
     for (int id : JigConfig.FALLBACK_IDS) {
-      DeviceDiscovery.DeviceInfo d =
-          new DeviceDiscovery.DeviceInfo("Talon FX", id, "", "", "rio", "", "", "");
+      DeviceDiscovery.DeviceInfo d = DeviceDiscovery.DeviceInfo.probed(id);
       if (motor(d).isConnected()) {
         found.add(d);
       }
@@ -202,6 +202,12 @@ final class JigSession {
   private void finish(MotorTestRun run) {
     DeviceDiscovery.DeviceInfo info = run.info();
     List<Map<String, Object>> history = store.loadAll();
+    Integer number =
+        MotorNumbers.numberFor(
+            info.serial(),
+            MotorNumbers.known(
+                Filesystem.getDeployDirectory().toPath().resolve(MotorNumbers.SEED_FILE), history));
+    String numberText = number == null ? "no number (serial unknown)" : "#" + number;
     MotorSpec spec = MotorSpec.lookup(run.motorType(), run.kvReported());
     FleetBaseline.Stats fleet = FleetBaseline.of(run.motorType(), info.serial(), history);
     HealthEstimator.Report report =
@@ -230,6 +236,7 @@ final class JigSession {
     Map<String, Object> record = new LinkedHashMap<>();
     record.put("format", "motor-health-jig");
     record.put("version", 1);
+    record.put("motorNumber", number);
     record.put("testedAt", at.toString());
     record.put("testedAtMs", at.toEpochMilli());
     record.put("clockTrusted", clockTrusted(at));
@@ -267,7 +274,8 @@ final class JigSession {
     record.put("jig", jigJson(run));
 
     String who = info.serial().isEmpty() ? "ID-" + info.id() : "SN-" + info.serial();
-    String stem = FILE_TIME.format(at) + "_" + RecordStore.fileSafe(who);
+    String stem =
+        FILE_TIME.format(at) + (number == null ? "" : "_M" + number) + "_" + RecordStore.fileSafe(who);
     String savedTo;
     try {
       Path file = store.save(record, stem);
@@ -275,6 +283,7 @@ final class JigSession {
       store.appendLog(
           List.of(
               at.toString(),
+              number == null ? "" : number.toString(),
               info.serial(),
               Integer.toString(info.id()),
               run.motorType(),
@@ -294,7 +303,10 @@ final class JigSession {
       System.err.println("[MotorHealth] Could not save the record: " + e);
     }
 
-    SmartDashboard.putString(NT + "Last/Motor", info.describe() + " (" + run.motorType() + ")");
+    SmartDashboard.putString(
+        NT + "Last/Number", number == null ? "none" : "#" + number + " (write it on the motor)");
+    SmartDashboard.putString(
+        NT + "Last/Motor", numberText + ": " + info.describe() + " (" + run.motorType() + ")");
     SmartDashboard.putString(NT + "Last/Serial", info.serial().isEmpty() ? "unknown" : info.serial());
     SmartDashboard.putNumber(NT + "Last/CanId", info.id());
     SmartDashboard.putString(NT + "Last/Verdict", report.verdict());
@@ -308,8 +320,9 @@ final class JigSession {
     SmartDashboard.putStringArray(NT + "Last/Flags", lines.toArray(new String[0]));
 
     System.out.printf(
-        "[MotorHealth] %s %s (%s): %s, score %d. %s%n  -> %s%n",
+        "[MotorHealth] %s %s %s (%s): %s, score %d. %s%n  -> %s%n",
         report.verdict(),
+        numberText,
         info.describe(),
         run.motorType(),
         report.summary(),
@@ -341,7 +354,10 @@ final class JigSession {
     m.put("bus", d.bus());
     m.put("firmware", d.firmware());
     m.put("hardwareRev", d.hardwareRev());
+    m.put("bootloaderRev", d.bootloaderRev());
     m.put("manufactured", d.manufactured());
+    m.put("proLicensed", d.proLicensed());
+    m.put("licenses", d.licenses());
     return m;
   }
 

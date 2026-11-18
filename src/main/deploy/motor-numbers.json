@@ -1,0 +1,33 @@
+{
+  "about": "Motors numbered by hand. The number is only the team's order; the serial is the identity. The jig numbers any other serial itself: the next number after the highest in use. Identity fields below are as the Phoenix diagnostic server reported them on 2026-11-18.",
+  "motors": [
+    {
+      "number": 1,
+      "serial": "000E173405DC0000001900010B00011A",
+      "canId": 11,
+      "name": "Front Left Steer",
+      "model": "Talon FX vers. C",
+      "firmware": "26.1.1.1 (Phoenix 6)",
+      "hardwareRev": "3.4",
+      "bootloaderRev": "1.0",
+      "manufactured": "July 1, 2024",
+      "proLicensed": false,
+      "licenses": "",
+      "note": "2026 robot front-left steer. Not used on X1."
+    },
+    {
+      "number": 2,
+      "serial": "000E1670085CA00000160000D60000F9",
+      "canId": 30,
+      "name": "Flywheel left",
+      "model": "Talon FX vers. C",
+      "firmware": "26.1.1.1 (Phoenix 6)",
+      "hardwareRev": "3.4",
+      "bootloaderRev": "1.0",
+      "manufactured": "Jan 1, 2024",
+      "proLicensed": false,
+      "licenses": "LIC-24-80827900-FRC-05805",
+      "note": "2026 robot left flywheel, then X1 front-left drive. Holds a 2024 Phoenix Pro licence for 5805, not active."
+    }
+  ]
+}

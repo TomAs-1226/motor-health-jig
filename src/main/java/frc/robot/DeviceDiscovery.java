@@ -31,7 +31,15 @@ public final class DeviceDiscovery {
       String bus,
       String firmware,
       String hardwareRev,
-      String manufactured) {
+      String manufactured,
+      String bootloaderRev,
+      boolean proLicensed,
+      String licenses) {
+
+    /** A device known only by its CAN id (the fallback probe). */
+    static DeviceInfo probed(int id) {
+      return new DeviceInfo("Talon FX", id, "", "", "rio", "", "", "", "", false, "");
+    }
 
     /** A Talon FX: Falcon 500, Kraken X60 or Kraken X44. Talon FXS is a different class. */
     public boolean isTalonFx() {
@@ -141,9 +149,21 @@ public final class DeviceDiscovery {
               text(d, "CANbus"),
               text(d, "CurrentVers"),
               text(d, "HardwareRev"),
-              text(d, "ManDate")));
+              text(d, "ManDate"),
+              text(d, "BootloaderRev"),
+              d.path("IsPROLicensed").asBoolean(false),
+              joined(d.get("Licenses"))));
     }
     return out;
+  }
+
+  private static String joined(JsonNode arr) {
+    if (arr == null || !arr.isArray()) {
+      return "";
+    }
+    List<String> parts = new ArrayList<>();
+    arr.forEach(x -> parts.add(x.asText().trim()));
+    return String.join(" ", parts);
   }
 
   private static String text(JsonNode n, String field) {

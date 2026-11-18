@@ -22,7 +22,7 @@ import java.util.Map;
  */
 public final class RecordStore {
   static final String CSV_HEADER =
-      "testedAt,serial,canId,motorType,firmware,label,verdict,score,kvRpsPerV,projectedFreeRpm12V,"
+      "testedAt,motorNumber,serial,canId,motorType,firmware,label,verdict,score,kvRpsPerV,projectedFreeRpm12V,"
           + "freeCurrentA,coastHalfS,tempRiseC,summary";
 
   private static final ObjectMapper MAPPER =

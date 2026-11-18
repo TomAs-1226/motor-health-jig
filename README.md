@@ -84,6 +84,14 @@ The run starts at 100. Each WARN costs 12 points and each FAIL costs 45. Any FAI
 
 **The thresholds are first estimates and have not been checked on hardware.** Before trusting a FAIL, run three or four motors you know are good (that also builds the fleet baseline) and one you know is bad, then adjust `Limits`. A free-spin test cannot see torque under load, or a winding that fails only when hot.
 
+## Motor numbers
+
+Every motor gets a team number (#1, #2, #3…), which is only there to keep motors in order. The motor's identity is its serial number, and every record also keeps the CAN id, Tuner name, model, firmware, hardware and bootloader revisions, manufacture date and Pro licence.
+
+- A motor the jig has never seen gets the next number after the highest in use. Write it on the motor: the jig shows it in `MotorHealth/Last/Number`.
+- Motors numbered by hand are listed in `src/main/deploy/motor-numbers.json`. A number there always wins, and those motors appear in `records/README.md` even before their first test.
+- #1 and #2 are the two motors from X1's rio. Their histories are in the seed file's notes.
+
 ## What a record holds
 
 `tests/20261117-200102_SN-<serial>.json` contains:

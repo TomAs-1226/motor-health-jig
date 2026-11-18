@@ -32,11 +32,16 @@ ROOT = Path(__file__).resolve().parent.parent
 RECORDS = ROOT / "records"
 TESTS = RECORDS / "tests"
 
+SEED = ROOT / "src" / "main" / "deploy" / "motor-numbers.json"
+
 COLUMNS = [
-    "serial", "canId", "motorType", "label", "verdict", "score", "testedAt",
-    "projectedFreeRpm12V", "freeCurrentA", "coastHalfS", "kvRpsPerV", "tempRiseC",
-    "firmware", "manufactured", "summary", "file",
+    "number", "serial", "canId", "name", "model", "motorType", "firmware", "hardwareRev",
+    "bootloaderRev", "manufactured", "proLicensed", "licenses", "label", "verdict", "score",
+    "testedAt", "projectedFreeRpm12V", "freeCurrentA", "coastHalfS", "kvRpsPerV", "tempRiseC",
+    "summary", "file",
 ]
+IDENTITY = ["serial", "canId", "name", "model", "firmware", "hardwareRev", "bootloaderRev",
+            "manufactured", "proLicensed", "licenses"]
 
 
 def default_hosts() -> list[str]:
@@ -98,8 +103,8 @@ def row(r: dict) -> dict:
     res = r.get("result", {})
     x = res.get("metrics", {})
     return {
-        "serial": m.get("serial") or "",
-        "canId": m.get("canId", ""),
+        "number": r.get("motorNumber") or "",
+        **{k: m.get(k, "") for k in IDENTITY},
         "motorType": m.get("motorType", ""),
         "label": r.get("label", ""),
         "verdict": res.get("verdict", ""),
@@ -110,8 +115,6 @@ def row(r: dict) -> dict:
         "coastHalfS": fmt(x.get("coastHalfS"), 2),
         "kvRpsPerV": fmt(x.get("kvRpsPerV"), 3),
         "tempRiseC": fmt(x.get("tempRiseC"), 1),
-        "firmware": m.get("firmware", ""),
-        "manufactured": m.get("manufactured", ""),
         "summary": res.get("summary", ""),
         "file": r["_file"],
     }
@@ -136,7 +139,21 @@ def summarize(records: list[dict]) -> None:
         m = r.get("motor", {})
         key = m.get("serial") or f"no-serial:{r['_file']}"
         newest[key] = r
-    motors = sorted((row(r) for r in newest.values()), key=lambda x: (x["motorType"], x["serial"]))
+    motors = [row(r) for r in newest.values()]
+    # Hand-numbered motors with no jig test yet still get a row.
+    tested = {m["serial"] for m in motors}
+    seed = json.loads(SEED.read_text(encoding="utf-8")).get("motors", []) if SEED.exists() else []
+    for s in seed:
+        if s.get("serial") in tested:
+            continue
+        motors.append({**{c: "" for c in COLUMNS}, **{k: s.get(k, "") for k in IDENTITY},
+                       "number": s.get("number", ""), "verdict": "not tested",
+                       "summary": s.get("note", "")})
+    numbered = {s.get("serial"): s.get("number") for s in seed}
+    for m in motors:
+        if not m["number"] and m["serial"] in numbered:
+            m["number"] = numbered[m["serial"]]
+    motors.sort(key=lambda x: (x["number"] == "", int(x["number"]) if str(x["number"]).isdigit() else 0, x["serial"]))
 
     write_csv(RECORDS / "history.csv", history)
     write_csv(RECORDS / "motors.csv", motors)
@@ -157,23 +174,31 @@ def summarize(records: list[dict]) -> None:
         f"{len(motors)} motors, {len(history)} tests. "
         + ", ".join(f"{v or 'unknown'}: {n}" for v, n in sorted(counts.items())),
         "",
-        "| Serial | Type | Label | Verdict | Score | Free speed @12 V | Free current | Coast ½ | Tests | Last tested | Notes |",
-        "|---|---|---|---|---|---|---|---|---|---|---|",
+        "The `#` is only the team's order. The serial is the motor's identity; `motors.csv` has every",
+        "identity field (Tuner name, bootloader, licences).",
+        "",
+        "| # | Serial | CAN id | Model | Type | Firmware | HW rev | Made | Verdict | Score | Free speed @12 V | Free current | Coast ½ | Tests | Last tested | Notes |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for m in motors:
         lines.append(
-            "| {serial} | {type} | {label} | **{verdict}** | {score} | {rpm} | {amps} | {coast} | {n} | [{date}]({file}) | {summary} |".format(
+            "| {num} | {serial} | {can} | {model} | {type} | {fw} | {hw} | {made} | **{verdict}** | {score} | {rpm} | {amps} | {coast} | {n} | [{date}]({file}) | {summary} |".format(
+                num=f"**{m['number']}**" if m["number"] else "",
                 serial=f"`{m['serial']}`" if m["serial"] else "_unknown_",
+                can=m["canId"],
+                model=str(m["model"]).replace("|", "/"),
                 type=m["motorType"].replace("_Integrated", ""),
-                label=m["label"].replace("|", "/"),
+                fw=str(m["firmware"]).replace(" (Phoenix 6)", ""),
+                hw=m["hardwareRev"],
+                made=m["manufactured"],
                 verdict=m["verdict"],
                 score=m["score"],
                 rpm=f"{m['projectedFreeRpm12V']} rpm" if m["projectedFreeRpm12V"] else "",
                 amps=f"{m['freeCurrentA']} A" if m["freeCurrentA"] else "",
                 coast=f"{m['coastHalfS']} s" if m["coastHalfS"] else "",
-                n=tests_per.get(m["serial"], 1) if m["serial"] else 1,
-                date=m["testedAt"][:10],
-                file=m["file"],
+                n=tests_per.get(m["serial"], 0) if m["serial"] else 1,
+                date=m["testedAt"][:10] or "-",
+                file=m["file"] or ".",
                 summary=m["summary"].replace("|", "/"),
             )
         )
