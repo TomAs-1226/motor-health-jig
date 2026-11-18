@@ -84,6 +84,34 @@
       "proLicensed": false,
       "licenses": "",
       "note": "Different batch from #1, #3-#5. On the 2026 robot with #1."
+    },
+    {
+      "number": 7,
+      "serial": "000E173405DC00000019000127000105",
+      "canId": 18,
+      "name": "Back Right Drive",
+      "model": "Talon FX vers. C",
+      "firmware": "26.1.1.1 (Phoenix 6)",
+      "hardwareRev": "3.4",
+      "bootloaderRev": "1.0",
+      "manufactured": "July 1, 2024",
+      "proLicensed": false,
+      "licenses": "",
+      "note": "Same batch as #1. On the 2026 robot with #1."
+    },
+    {
+      "number": 8,
+      "serial": "000E1734060EC80000180000DA00010C",
+      "canId": 50,
+      "name": "climberGB",
+      "model": "Talon FX vers. C",
+      "firmware": "25.5.1.0 (Phoenix 6)",
+      "hardwareRev": "3.4",
+      "bootloaderRev": "1.0",
+      "manufactured": "Jan 1, 2024",
+      "proLicensed": false,
+      "licenses": "LIC-24-80827900-FRC-05805",
+      "note": "Still on 2025 firmware: flash 2026 firmware before testing on the jig. Not in any log on X1's rio; climber history is elsewhere."
     }
   ]
 }
