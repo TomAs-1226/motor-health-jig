@@ -28,6 +28,62 @@
       "proLicensed": false,
       "licenses": "LIC-24-80827900-FRC-05805",
       "note": "2026 robot left flywheel, then X1 front-left drive. Holds a 2024 Phoenix Pro licence for 5805, not active."
+    },
+    {
+      "number": 3,
+      "serial": "000E173405DC0000001900010600011B",
+      "canId": 12,
+      "name": "Front Left Drive",
+      "model": "Talon FX vers. C",
+      "firmware": "26.1.1.1 (Phoenix 6)",
+      "hardwareRev": "3.4",
+      "bootloaderRev": "1.0",
+      "manufactured": "July 1, 2024",
+      "proLicensed": false,
+      "licenses": "",
+      "note": "Same batch as #1. On the 2026 robot with #1."
+    },
+    {
+      "number": 4,
+      "serial": "000E173405DC00000019000125000109",
+      "canId": 17,
+      "name": "Back Right Steer",
+      "model": "Talon FX vers. C",
+      "firmware": "26.1.1.1 (Phoenix 6)",
+      "hardwareRev": "3.4",
+      "bootloaderRev": "1.0",
+      "manufactured": "July 1, 2024",
+      "proLicensed": false,
+      "licenses": "",
+      "note": "Same batch as #1. On the 2026 robot with #1."
+    },
+    {
+      "number": 5,
+      "serial": "000E173405DC0000001900012A000108",
+      "canId": 15,
+      "name": "Black Left Drive",
+      "model": "Talon FX vers. C",
+      "firmware": "26.1.1.1 (Phoenix 6)",
+      "hardwareRev": "3.4",
+      "bootloaderRev": "1.0",
+      "manufactured": "July 1, 2024",
+      "proLicensed": false,
+      "licenses": "",
+      "note": "Same batch as #1. On the 2026 robot with #1."
+    },
+    {
+      "number": 6,
+      "serial": "000E0AE7074F1800001900011600011C",
+      "canId": 20,
+      "name": "Front Right Steer",
+      "model": "Talon FX vers. C",
+      "firmware": "26.1.1.1 (Phoenix 6)",
+      "hardwareRev": "3.4",
+      "bootloaderRev": "1.0",
+      "manufactured": "June 1, 2024",
+      "proLicensed": false,
+      "licenses": "",
+      "note": "Different batch from #1, #3-#5. On the 2026 robot with #1."
     }
   ]
 }
