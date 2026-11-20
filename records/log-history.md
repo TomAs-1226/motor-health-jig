@@ -14,6 +14,8 @@ Usage before each motor came to the jig. It comes from the CTRE `.hoot` logs lef
 | 8 | `000E1734060EC80000180000DA00010C` | 50 | Jan 2024 | Climber ("climberGB") | 0 | — | — | — | — | — | — | unknown⁵ |
 | 9 | `000E196A00ABE00000180000DF00011A` | 0 | Sep 2025 | None: factory id and name (Kraken X44) | 0 | — | — | — | — | — | — | likely new⁶ |
 | 10 | `000E1E4A0290400000170000EA0000E2` | 34 | May 2025 | Hood (Kraken X44) | 168 | 72 | 8.7 min¹ | 3.6 min | 7 s | 56 A | none | GOOD |
+| 11 | `000E173405DC000000190000E40000FF` | 14 | Jul 2024 | Back-left steer | 169 | 70 | short moves¹ | 6.4 min | 28 s | 71 A | none² | GOOD |
+| 12 | `000E173405DC000000190000ED000101` | 21 | Jul 2024 | Front-right drive | 169⁷ | 79 | 8.5 min, 11k rev | 5.5 min | 77 s | 130 A | none | GOOD |
 
 1. Steer speed is logged in module turns, not motor turns, so the motor turned roughly 10–20× more than these figures show.
 2. `RemoteSensorDataInvalid` was raised 110 times on #1, 160 on #4 and 144 on #6. It means the steer motor lost its CANcoder signal: a robot wiring problem, not a motor fault.
@@ -22,9 +24,10 @@ Usage before each motor came to the jig. It comes from the CTRE `.hoot` logs lef
 5. CAN id 50 is in none of the logs on X1's rio; its climber history is on another robot. It is still on 2025 firmware (25.5.1.0): flash 2026 firmware in Tuner X before testing it on the jig.
 
 6. CAN id 0 and the default Tuner name mean nobody has ever set it up. The logs on X1's rio don't contain id 0.
+7. CAN id 21 also appears in 20 logs from an older robot's CANivore bus, which reused ids 20–27. Those are left out as likely different motors. `RemoteSensorDataInvalid` was raised 140 times on #11: CANcoder wiring, as with the other steer motors.
 
 The hood (#10) also moves through a gear reduction, so it was logged in mechanism turns, like the steer motors.
 
-None of the eight motors with logs ever raised `Fault_DeviceTemp`, `Fault_Hardware`, `Fault_RotorFault1/2` or `Fault_BootDuringEnable`. The logs don't record temperature itself.
+None of the ten motors with logs ever raised `Fault_DeviceTemp`, `Fault_Hardware`, `Fault_RotorFault1/2` or `Fault_BootDuringEnable`. The logs don't record temperature itself.
 
-**Estimate before the spin test:** all eight with history are likely GOOD, and #9 is likely new. #2 has about ten times the load time of any other motor and is the one to watch. #3, #5 and #7 are the drives with the hardest current spikes. #8 is unknown. The jig's free-spin test is what checks bearings, Kv and free current.
+**Estimate before the spin test:** all ten with history are likely GOOD, and #9 is likely new. #2 has about ten times the load time of any other motor and is the one to watch. #3, #5 and #7 are the drives with the hardest current spikes. #8 is unknown. The jig's free-spin test is what checks bearings, Kv and free current.

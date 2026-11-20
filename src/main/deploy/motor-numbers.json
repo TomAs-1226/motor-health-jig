@@ -140,6 +140,34 @@
       "proLicensed": true,
       "licenses": "LIC-26-80827900-FRC-05805",
       "note": "Kraken X44. 2026 robot hood. Active 2026 Phoenix Pro licence."
+    },
+    {
+      "number": 11,
+      "serial": "000E173405DC000000190000E40000FF",
+      "canId": 14,
+      "name": "Back Left Steer",
+      "model": "Talon FX vers. C",
+      "firmware": "26.1.1.1 (Phoenix 6)",
+      "hardwareRev": "3.4",
+      "bootloaderRev": "1.0",
+      "manufactured": "July 1, 2024",
+      "proLicensed": false,
+      "licenses": "",
+      "note": "Same batch as #1. 2026 robot back-left steer."
+    },
+    {
+      "number": 12,
+      "serial": "000E173405DC000000190000ED000101",
+      "canId": 21,
+      "name": "Front Right Drive",
+      "model": "Talon FX vers. C",
+      "firmware": "26.1.1.1 (Phoenix 6)",
+      "hardwareRev": "3.4",
+      "bootloaderRev": "1.0",
+      "manufactured": "July 1, 2024",
+      "proLicensed": false,
+      "licenses": "",
+      "note": "Same batch as #1. 2026 robot front-right drive."
     }
   ]
 }
